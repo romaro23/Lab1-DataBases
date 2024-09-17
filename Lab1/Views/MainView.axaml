@@ -1,0 +1,46 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:Lab1.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Lab1.Views.MainView"
+             x:DataType="vm:MainViewModel">
+  <Design.DataContext>
+    <!-- This only sets the DataContext for the previewer in an IDE,
+         to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+    <vm:MainViewModel />
+  </Design.DataContext>
+	<Grid Background="Aqua">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="*"/>
+			<RowDefinition Height="*"/>
+			<RowDefinition Height="*"/>
+		</Grid.RowDefinitions>
+		<DataGrid Width="650"  HorizontalAlignment="Left" Grid.Row="0" ItemsSource="{Binding Costs_}" >
+			<DataGrid.Columns>
+				<DataGridTextColumn Header="account_number" Binding="{Binding account_number}" />
+				<DataGridTextColumn Header="cost_id" Binding="{Binding cost_id}" />
+				<DataGridTextColumn Header="type_id" Binding="{Binding type_id}" />
+				<DataGridTextColumn Header="department_id" Binding="{Binding department_id}" />
+				<DataGridTextColumn Header="amount" Binding="{Binding amount}" />
+				<DataGridTextColumn Header="date_of_cost" Binding="{Binding date_of_cost, StringFormat={}{0:yyyy-MM-dd}}" Width="*" />
+			</DataGrid.Columns>
+		</DataGrid>
+	<DataGrid Width="390"  HorizontalAlignment="Left" Grid.Row="1" ItemsSource="{Binding Costs_type_}" >
+		<DataGrid.Columns>
+			<DataGridTextColumn Header="type_id" Binding="{Binding type_id}" />
+			<DataGridTextColumn Header="name" Binding="{Binding name}" />
+			<DataGridTextColumn Header="description" Binding="{Binding description}" />
+			<DataGridTextColumn Header="limit_amount" Binding="{Binding limit_amount}" Width="*" />
+		</DataGrid.Columns>
+		</DataGrid>
+<DataGrid HorizontalAlignment="Left" Width="380" Grid.Row="2" ItemsSource="{Binding Departments_}" >
+	<DataGrid.Columns>
+		<DataGridTextColumn Header="department_id" Binding="{Binding department_id}" />
+		<DataGridTextColumn Header="name" Binding="{Binding name}" />
+		<DataGridTextColumn Header="number_of_employees" Binding="{Binding number_of_employees}" Width="*" />
+	</DataGrid.Columns>
+		</DataGrid>
+	</Grid>
+</UserControl>
