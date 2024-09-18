@@ -1,6 +1,7 @@
 ﻿namespace Lab1.ViewModels;
 
 using Lab1.Data;
+using Lab1.Views;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -37,9 +38,12 @@ public class MainViewModel : ViewModelBase
     public ObservableCollection<Costs> Costs_ { get; set; } = new ObservableCollection<Costs>();
     public ObservableCollection<Costs_type> Costs_type_ { get; set; } = new ObservableCollection<Costs_type>();
     public ObservableCollection<Departments> Departments_ { get; set; } = new ObservableCollection<Departments>();
-    public MainViewModel()
+    public void RefreshTables()
     {
-       DB dataBase = new DB();
+        DB dataBase = new DB();
+        Costs_.Clear();
+        Costs_type_.Clear();
+        Departments_.Clear();
         DataTable costsTable = dataBase.GetData("SELECT * FROM Costs");
         DataTable departmentsTable = dataBase.GetData("SELECT * FROM Departments");
         DataTable costs_typeTable = dataBase.GetData("SELECT * FROM Costs_type");
@@ -71,8 +75,16 @@ public class MainViewModel : ViewModelBase
             department.number_of_employees = int.Parse(row["number_of_employees"].ToString()!);
             Departments_.Add(department);
         }
-
+    }
+    public MainViewModel()
+    {
+        MainView.TableChanged += MainView_TableChanged;
+        RefreshTables();
 
     }
 
+    private void MainView_TableChanged(object? sender, EventArgs e)
+    {
+        RefreshTables();
+    }
 }

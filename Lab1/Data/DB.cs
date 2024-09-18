@@ -23,6 +23,21 @@ namespace Lab1.Data
             CloseConnection();
             return dataTable;
         }
+        public void InsertData(int type_id, int department_id, int amount)
+        {
+            string query = "INSERT INTO Costs (account_number, type_id, department_id, amount, date_of_cost) " +
+                                 "VALUES (@AccountNumber, @TypeId, @DepartmentId, @Amount, @DateOfCost)";
+            OpenConnection();
+            SqlCommand command = new SqlCommand(query, sqlConnection);
+            Random random = new Random();
+            command.Parameters.AddWithValue("@AccountNumber", random.Next(1000, 10000));
+            command.Parameters.AddWithValue("@TypeId", type_id);
+            command.Parameters.AddWithValue("@DepartmentId", department_id);
+            command.Parameters.AddWithValue("@Amount", amount);
+            command.Parameters.AddWithValue("@DateOfCost", DateTime.Now);
+            command.ExecuteNonQuery();
+            CloseConnection();
+        }
         public void OpenConnection()
         {
             if (sqlConnection.State == System.Data.ConnectionState.Closed)
