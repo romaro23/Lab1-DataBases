@@ -3,44 +3,75 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:Lab1.ViewModels"
+			 xmlns:themes="clr-namespace:Material.Styles.Themes;assembly=Material.Styles"
+			 xmlns:controls="clr-namespace:Material.Styles.Controls;assembly=Material.Styles"
+			 xmlns:styles="clr-namespace:Material.Styles;assembly=Material.Styles"
+			  xmlns:p1="clr-namespace:Material.Styles.Assists;assembly=Material.Styles" xmlns:dialogHost="clr-namespace:DialogHostAvalonia;assembly=DialogHost.Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Lab1.Views.MainView"
              x:DataType="vm:MainViewModel">
-  <Design.DataContext>
-    <!-- This only sets the DataContext for the previewer in an IDE,
-         to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-    <vm:MainViewModel />
-  </Design.DataContext>
-	<Grid Background="Aqua">
-		<Grid.RowDefinitions>
-			<RowDefinition Height="*"/>
-			<RowDefinition Height="*"/>
-			<RowDefinition Height="*"/>
-		</Grid.RowDefinitions>
-		<DataGrid Width="650"  HorizontalAlignment="Left" Grid.Row="0" ItemsSource="{Binding Costs_}" >
-			<DataGrid.Columns>
-				<DataGridTextColumn Header="account_number" Binding="{Binding account_number}" />
-				<DataGridTextColumn Header="cost_id" Binding="{Binding cost_id}" />
-				<DataGridTextColumn Header="type_id" Binding="{Binding type_id}" />
-				<DataGridTextColumn Header="department_id" Binding="{Binding department_id}" />
-				<DataGridTextColumn Header="amount" Binding="{Binding amount}" />
-				<DataGridTextColumn Header="date_of_cost" Binding="{Binding date_of_cost, StringFormat={}{0:yyyy-MM-dd}}" Width="*" />
-			</DataGrid.Columns>
-		</DataGrid>
-	<DataGrid Width="390"  HorizontalAlignment="Left" Grid.Row="1" ItemsSource="{Binding Costs_type_}" >
-		<DataGrid.Columns>
-			<DataGridTextColumn Header="type_id" Binding="{Binding type_id}" />
-			<DataGridTextColumn Header="name" Binding="{Binding name}" />
-			<DataGridTextColumn Header="description" Binding="{Binding description}" />
-			<DataGridTextColumn Header="limit_amount" Binding="{Binding limit_amount}" Width="*" />
-		</DataGrid.Columns>
-		</DataGrid>
-<DataGrid HorizontalAlignment="Left" Width="380" Grid.Row="2" ItemsSource="{Binding Departments_}" >
-	<DataGrid.Columns>
-		<DataGridTextColumn Header="department_id" Binding="{Binding department_id}" />
-		<DataGridTextColumn Header="name" Binding="{Binding name}" />
-		<DataGridTextColumn Header="number_of_employees" Binding="{Binding number_of_employees}" Width="*" />
-	</DataGrid.Columns>
-		</DataGrid>
+	<Design.DataContext>
+		<vm:MainViewModel />
+
+	</Design.DataContext>
+	<Grid >
+		<Button Margin="400,0,0,0" Name="Button1" Classes="light" Content="Create cost" ToolTip.Tip="Button with classes &quot;Light&quot;" Clip="" />
+		<Grid ZIndex="2">
+			<dialogHost:DialogHost  IsOpen="True" CloseOnClickAway="True" OverlayBackground="Transparent" x:Name="Dialog" Background="Aqua" >
+				<dialogHost:DialogHost.DialogContent>
+					<Grid>
+						<Grid.RowDefinitions>
+							<RowDefinition Height="*"/>
+							<RowDefinition Height="*"/>
+							<RowDefinition Height="*"/>
+							<RowDefinition Height="*"/>
+						</Grid.RowDefinitions>
+						<TextBox Grid.Row="0" Margin="0,0,0,10" UseFloatingWatermark="True" Theme="{StaticResource FilledTextBox}"
+							 Watermark="Type_id" p1:TextFieldAssist.Label="Filled TextBox"/>
+						<TextBox Grid.Row="1" Margin="0,0,0,10" UseFloatingWatermark="True" Theme="{StaticResource FilledTextBox}"
+								 Watermark="Department_id" p1:TextFieldAssist.Label="Filled TextBox"/>
+						<TextBox Margin="0,0,0,10" Grid.Row="2" UseFloatingWatermark="True" Theme="{StaticResource FilledTextBox}"
+								 Watermark="Amount" p1:TextFieldAssist.Label="Filled TextBox"/>
+						<Button HorizontalAlignment="Center" Grid.Row="3" Name="Button2" Classes="light" Content="Create cost" ToolTip.Tip="Button with classes &quot;Light&quot;" Clip="" />
+					</Grid>
+					
+				</dialogHost:DialogHost.DialogContent>
+			</dialogHost:DialogHost>
+		</Grid>
+		
+		
+		
+		<Grid>
+			<Grid.RowDefinitions>
+				<RowDefinition Height="*"/>
+				<RowDefinition Height="*"/>
+				<RowDefinition Height="*"/>
+			</Grid.RowDefinitions>
+			<DataGrid Width="650"  HorizontalAlignment="Left" Grid.Row="0" ItemsSource="{Binding Costs_}" >
+				<DataGrid.Columns>
+					<DataGridTextColumn Header="account_number" Binding="{Binding account_number}" />
+					<DataGridTextColumn Header="cost_id" Binding="{Binding cost_id}" />
+					<DataGridTextColumn Header="type_id" Binding="{Binding type_id}" />
+					<DataGridTextColumn Header="department_id" Binding="{Binding department_id}" />
+					<DataGridTextColumn Header="amount" Binding="{Binding amount}" />
+					<DataGridTextColumn Header="date_of_cost" Binding="{Binding date_of_cost, StringFormat={}{0:yyyy-MM-dd}}" Width="*" />
+				</DataGrid.Columns>
+			</DataGrid>
+			<DataGrid Width="390"  HorizontalAlignment="Left" Grid.Row="1" ItemsSource="{Binding Costs_type_}" >
+				<DataGrid.Columns>
+					<DataGridTextColumn Header="type_id" Binding="{Binding type_id}" />
+					<DataGridTextColumn Header="name" Binding="{Binding name}" />
+					<DataGridTextColumn Header="description" Binding="{Binding description}" />
+					<DataGridTextColumn Header="limit_amount" Binding="{Binding limit_amount}" Width="*" />
+				</DataGrid.Columns>
+			</DataGrid>
+			<DataGrid HorizontalAlignment="Left" Width="380" Grid.Row="2" ItemsSource="{Binding Departments_}" >
+				<DataGrid.Columns>
+					<DataGridTextColumn Header="department_id" Binding="{Binding department_id}" />
+					<DataGridTextColumn Header="name" Binding="{Binding name}" />
+					<DataGridTextColumn Header="number_of_employees" Binding="{Binding number_of_employees}" Width="*" />
+				</DataGrid.Columns>
+			</DataGrid>
+		</Grid>
 	</Grid>
 </UserControl>
