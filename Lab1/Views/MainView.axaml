@@ -15,7 +15,12 @@
 
 	</Design.DataContext>
 	<Grid>
-		<Button Margin="400,0,0,0" Name="Button1" Classes="light" Content="Create cost" ToolTip.Tip="Button with classes &quot;Light&quot;" Clip="" />
+		<StackPanel  Margin="400,200,0,0">
+			<Button Name="Button1" Classes="light" Content="Create cost" ToolTip.Tip="Button with classes &quot;Light&quot;" Clip="" />
+			<Button Name="ClearTable" Classes="light" Content="Clear table" ToolTip.Tip="Button with classes &quot;Light&quot;" Clip="" />
+		</StackPanel>
+
+
 		<Grid ZIndex="2">
 			<dialogHost:DialogHost DialogMargin="10" IsOpen="True" CloseOnClickAway="True"  x:Name="Dialog" Background="Aquamarine">
 				<dialogHost:DialogHost.DialogContent>
@@ -48,34 +53,13 @@
 				<RowDefinition Height="*"/>
 				<RowDefinition Height="*"/>
 			</Grid.RowDefinitions>
-			<DataGrid AutoGenerateColumns="False" Name="ExampleDatagrid">
-				
+			<DataGrid Grid.Row="0" AutoGenerateColumns="False" Name="Costs">				
 			</DataGrid>
-			<DataGrid IsVisible="False" Width="650"  HorizontalAlignment="Left" Grid.Row="0" ItemsSource="{Binding Costs_}" >
-				<DataGrid.Columns>
-					<DataGridTextColumn Header="account_number" Binding="{Binding account_number}" />
-					<DataGridTextColumn Header="cost_id" Binding="{Binding cost_id}" />
-					<DataGridTextColumn Header="type_id" Binding="{Binding type_id}" />
-					<DataGridTextColumn Header="department_id" Binding="{Binding department_id}" />
-					<DataGridTextColumn Header="amount" Binding="{Binding amount}" />
-					<DataGridTextColumn Header="date_of_cost" Binding="{Binding date_of_cost, StringFormat={}{0:yyyy-MM-dd}}" Width="*" />
-				</DataGrid.Columns>
+			<DataGrid Grid.Row="1" AutoGenerateColumns="False" Name="Costs_type">
 			</DataGrid>
-			<DataGrid Width="390"  HorizontalAlignment="Left" Grid.Row="1" ItemsSource="{Binding Costs_type_}" >
-				<DataGrid.Columns>
-					<DataGridTextColumn Header="type_id" Binding="{Binding type_id}" />
-					<DataGridTextColumn Header="name" Binding="{Binding name}" />
-					<DataGridTextColumn Header="description" Binding="{Binding description}" />
-					<DataGridTextColumn Header="limit_amount" Binding="{Binding limit_amount}" Width="*" />
-				</DataGrid.Columns>
+			<DataGrid Grid.Row="2"  AutoGenerateColumns="False" Name="Departments">
 			</DataGrid>
-			<DataGrid HorizontalAlignment="Left" Width="380" Grid.Row="2" ItemsSource="{Binding Departments_}" >
-				<DataGrid.Columns>
-					<DataGridTextColumn Header="department_id" Binding="{Binding department_id}" />
-					<DataGridTextColumn Header="name" Binding="{Binding name}" />
-					<DataGridTextColumn Header="number_of_employees" Binding="{Binding number_of_employees}" Width="*" />
-				</DataGrid.Columns>
-			</DataGrid>
+			
 		</Grid>
 	</Grid>
 </UserControl>

@@ -14,14 +14,30 @@ namespace Lab1.Data
         {
             DataTable dataTable = new DataTable();
             OpenConnection();
-
             SqlCommand command = new SqlCommand(query, sqlConnection);
             SqlDataAdapter adapter = new SqlDataAdapter(command);
             adapter.Fill(dataTable);
-
-
             CloseConnection();
             return dataTable;
+        }
+        public void ClearTable(params string[] names)
+        {
+            foreach (string name in names)
+            {
+                string query = $"delete from {name}";
+                string resetQuery = $"DBCC CHECKIDENT ('{name}', RESEED, 0);";
+                OpenConnection();
+                using (SqlCommand command = new SqlCommand(query, sqlConnection))
+                {
+                    command.ExecuteNonQuery();  
+                }
+                using (SqlCommand command = new SqlCommand(resetQuery, sqlConnection))
+                {
+                    command.ExecuteNonQuery();
+                }
+                
+                CloseConnection();
+            }
         }
         public void InsertData(int type_id, int department_id, int amount)
         {
