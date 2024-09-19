@@ -48,7 +48,10 @@
 				<RowDefinition Height="*"/>
 				<RowDefinition Height="*"/>
 			</Grid.RowDefinitions>
-			<DataGrid Width="650"  HorizontalAlignment="Left" Grid.Row="0" ItemsSource="{Binding Costs_}" >
+			<DataGrid AutoGenerateColumns="False" Name="ExampleDatagrid">
+				
+			</DataGrid>
+			<DataGrid IsVisible="False" Width="650"  HorizontalAlignment="Left" Grid.Row="0" ItemsSource="{Binding Costs_}" >
 				<DataGrid.Columns>
 					<DataGridTextColumn Header="account_number" Binding="{Binding account_number}" />
 					<DataGridTextColumn Header="cost_id" Binding="{Binding cost_id}" />

@@ -5,6 +5,7 @@ using Lab1.Data;
 using DialogHostAvalonia;
 using Lab1.ViewModels;
 using System;
+using Avalonia.Data;
 
 namespace Lab1.Views;
 
@@ -16,10 +17,21 @@ public partial class MainView : UserControl
         InitializeComponent();
         Button1.Click += Button1_Click;
         CreateCost.Click += CreateCost_Click;
+        DB dataBase = new DB();
+        DataTable costs = dataBase.GetData("SELECT * FROM Costs");
+        ExampleDatagrid.ItemsSource = costs.DefaultView;
+        foreach(DataColumn dataColumn in costs.Columns)
+        {
+            ExampleDatagrid.Columns.Add(new DataGridTextColumn { Header = dataColumn.ColumnName, Binding = new Binding($"Row.ItemArray[{dataColumn.Ordinal}]") });
+        }
     }
+    private void UpdateTables()
+    {
 
+    }
     private void CreateCost_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
+        
         int type_id = int.Parse(Type_idBox.Text);
         int department_id = int.Parse(Department_idBox.Text);
         int amount = int.Parse(AmountBox.Text);

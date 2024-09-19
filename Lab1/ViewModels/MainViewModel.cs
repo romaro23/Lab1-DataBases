@@ -1,5 +1,6 @@
 ﻿namespace Lab1.ViewModels;
 
+using Avalonia.Collections;
 using Lab1.Data;
 using Lab1.Views;
 using System;
@@ -40,41 +41,41 @@ public class MainViewModel : ViewModelBase
     public ObservableCollection<Departments> Departments_ { get; set; } = new ObservableCollection<Departments>();
     public void RefreshTables()
     {
-        DB dataBase = new DB();
-        Costs_.Clear();
-        Costs_type_.Clear();
-        Departments_.Clear();
-        DataTable costsTable = dataBase.GetData("SELECT * FROM Costs");
-        DataTable departmentsTable = dataBase.GetData("SELECT * FROM Departments");
-        DataTable costs_typeTable = dataBase.GetData("SELECT * FROM Costs_type");
-        foreach (DataRow row in costsTable.Rows)
-        {
-            var cost = new Costs();
-            cost.account_number = int.Parse(row["account_number"].ToString()!);
-            cost.cost_id = int.Parse(row["cost_id"].ToString()!);
-            cost.type_id = int.Parse(row["type_id"].ToString()!);
-            cost.department_id = int.Parse(row["department_id"].ToString()!);
-            cost.amount = int.Parse(row["amount"].ToString()!);
-            cost.date_of_cost = (DateTime)row["date_of_cost"];
-            Costs_.Add(cost);
-        }
-        foreach (DataRow row in costs_typeTable.Rows)
-        {
-            var costs_type = new Costs_type();
-            costs_type.type_id = int.Parse(row["type_id"].ToString()!);
-            costs_type.name = row["name"].ToString();
-            costs_type.description = row["description"].ToString();
-            costs_type.limit_amount = int.Parse(row["limit_amount"].ToString()!);
-            Costs_type_.Add(costs_type);
-        }
-        foreach (DataRow row in departmentsTable.Rows)
-        {
-            var department = new Departments();
-            department.department_id = int.Parse(row["department_id"].ToString()!);
-            department.name = row["name"].ToString();
-            department.number_of_employees = int.Parse(row["number_of_employees"].ToString()!);
-            Departments_.Add(department);
-        }
+        //DB dataBase = new DB();
+        //Costs_.Clear();
+        //Costs_type_.Clear();
+        //Departments_.Clear();
+        //DataTable costsTable = dataBase.GetData("SELECT * FROM Costs");
+        //DataTable departmentsTable = dataBase.GetData("SELECT * FROM Departments");
+        //DataTable costs_typeTable = dataBase.GetData("SELECT * FROM Costs_type");
+        //foreach (DataRow row in costsTable.Rows)
+        //{
+        //    var cost = new Costs();
+        //    cost.account_number = int.Parse(row["account_number"].ToString()!);
+        //    cost.cost_id = int.Parse(row["cost_id"].ToString()!);
+        //    cost.type_id = int.Parse(row["type_id"].ToString()!);
+        //    cost.department_id = int.Parse(row["department_id"].ToString()!);
+        //    cost.amount = int.Parse(row["amount"].ToString()!);
+        //    cost.date_of_cost = (DateTime)row["date_of_cost"];
+        //    Costs_.Add(cost);
+        //}
+        //foreach (DataRow row in costs_typeTable.Rows)
+        //{
+        //    var costs_type = new Costs_type();
+        //    costs_type.type_id = int.Parse(row["type_id"].ToString()!);
+        //    costs_type.name = row["name"].ToString();
+        //    costs_type.description = row["description"].ToString();
+        //    costs_type.limit_amount = int.Parse(row["limit_amount"].ToString()!);
+        //    Costs_type_.Add(costs_type);
+        //}
+        //foreach (DataRow row in departmentsTable.Rows)
+        //{
+        //    var department = new Departments();
+        //    department.department_id = int.Parse(row["department_id"].ToString()!);
+        //    department.name = row["name"].ToString();
+        //    department.number_of_employees = int.Parse(row["number_of_employees"].ToString()!);
+        //    Departments_.Add(department);
+        //}
     }
     public MainViewModel()
     {
