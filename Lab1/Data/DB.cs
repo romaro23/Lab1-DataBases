@@ -7,7 +7,7 @@ using System.Data.SqlClient;
 using System.Data;
 namespace Lab1.Data
 {
-    internal class DB
+    public class DB
     {
         SqlConnection sqlConnection = new SqlConnection(@"Data Source=Romaro-PC;Initial Catalog=Lab1;Integrated Security=True;TrustServerCertificate=True");
         public DataTable GetData(string query)
@@ -38,6 +38,20 @@ namespace Lab1.Data
                 
                 CloseConnection();
             }
+        }
+        public void ChangeData(int cost_id, int type_id, int department_id, int amount)
+        {
+            OpenConnection();
+            string query = "UPDATE Costs SET type_id = @TypeId, department_id = @DepartmentId, amount = @Amount WHERE cost_id = @CostId";
+            using (SqlCommand command = new SqlCommand(query, sqlConnection))
+            {
+                command.Parameters.AddWithValue("@CostId", cost_id);
+                command.Parameters.AddWithValue("@TypeId", type_id);
+                command.Parameters.AddWithValue("@DepartmentId", department_id);
+                command.Parameters.AddWithValue("@Amount", amount);
+                command.ExecuteNonQuery();
+            }
+            CloseConnection();
         }
         public void InsertData(int type_id, int department_id, int amount)
         {
