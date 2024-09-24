@@ -15,27 +15,38 @@
 
 	</Design.DataContext>
 	<Grid>
-		<StackPanel  Margin="100,200,0,0">
-			<Button Name="CreateCostButton" Classes="light" Content="Create cost" ToolTip.Tip="Button with classes &quot;Light&quot;" Clip="" />
-			<Button Name="ChangeCostButton" Classes="light" Content="Change cost" ToolTip.Tip="Button with classes &quot;Light&quot;" Clip="" />
-			<Button Name="ClearTable" Classes="light" Content="Clear table" ToolTip.Tip="Button with classes &quot;Light&quot;" Clip="" />
-			
+		<StackPanel VerticalAlignment="Top" Margin="30" 
+		HorizontalAlignment="Center" Orientation="Horizontal" 			>
+			<Button Background="AntiqueWhite" Name="CreateCostButton" Classes="light" Content="Create cost"  Clip="" />
+			<Button Background="AntiqueWhite" Name="ChangeCostButton" Classes="light" Content="Change cost" Clip="" />
+			<Button Background="AntiqueWhite"  Name="DeleteCostButton" Classes="light" Content="Delete cost" Clip="" />
+			<Button Background="AntiqueWhite"  Name="QueryButton" Classes="light" Content="Query" Clip="" />
 		</StackPanel>
 
-
+<Grid ZIndex="2">
+			<dialogHost:DialogHost DialogMargin="10"  CloseOnClickAway="True"  x:Name="QueryDialog" Background="Aquamarine" IsOpen="False">
+				<dialogHost:DialogHost.DialogContent>
+					<DataGrid BorderBrush="Black" BorderThickness="1" Background="Azure"
+							  AutoGenerateColumns="False" Name="QueryGrid"
+					  Width="720" HorizontalAlignment="Center"></DataGrid>
+				</dialogHost:DialogHost.DialogContent>
+				</dialogHost:DialogHost>
+		</Grid>
 		<Grid ZIndex="2">
 			<dialogHost:DialogHost DialogMargin="10" IsOpen="True" CloseOnClickAway="True"  x:Name="Dialog" Background="Aquamarine">
 				<dialogHost:DialogHost.DialogContent>
 
-					<Grid>
+					<Grid Name="DialogContent">
 						<Grid.RowDefinitions>
 							<RowDefinition Height="*"/>		<RowDefinition Height="*"/>
 							<RowDefinition Height="*"/>
 							<RowDefinition Height="*"/>
 							<RowDefinition Height="*"/>
+<RowDefinition Height="*"/>
+						<RowDefinition Height="*"/>
 						</Grid.RowDefinitions>
 						<ComboBox x:Name="Cost_idBox" CornerRadius="6" Margin="0,0,0,10" Grid.Row="0"
-				 SelectionChanged="ComboBox_SelectionChanged_1" PlaceholderForeground="Gray"			Width="120"	  PlaceholderText="Cost_id" Theme="{StaticResource FilledTextBox}"
+				 Width="120" SelectionChanged="ComboBox_SelectionChanged_1" PlaceholderForeground="Gray"				  PlaceholderText="Cost_id" Theme="{StaticResource FilledTextBox}"
 							p1:TextFieldAssist.Label="Filled TextBox"></ComboBox>
 						<TextBox x:Name="Type_idBox" CornerRadius="6" Grid.Row="1" Margin="0,0,0,10" UseFloatingWatermark="True" Theme="{StaticResource FilledTextBox}"
 							 Watermark="Type_id" p1:TextFieldAssist.Label="Filled TextBox"/>
@@ -43,10 +54,13 @@
 								 Watermark="Department_id" p1:TextFieldAssist.Label="Filled TextBox"/>
 						<TextBox x:Name="AmountBox" CornerRadius="6" Margin="0,0,0,10" Grid.Row="3" UseFloatingWatermark="True" Theme="{StaticResource FilledTextBox}"
 								 Watermark="Amount" p1:TextFieldAssist.Label="Filled TextBox"/>
-						<Button x:Name="CreateCost" Background="Aqua" CornerRadius="6"
-	IsEnabled="False" IsVisible="False" 							Content="Create cost" HorizontalAlignment="Center" Grid.Row="4" Classes="light"  ToolTip.Tip="Button with classes &quot;Light&quot;" Clip="" />
+						<Button x:Name="CreateCost" Background="AntiqueWhite" CornerRadius="6" IsVisible="False" 							Content="Create cost" HorizontalAlignment="Center" Grid.Row="4" Classes="light"   />
 						<Button x:Name="ChangeCost"
-							IsEnabled="False" IsVisible="False" Content="Change cost" Background="Aqua" CornerRadius="6" HorizontalAlignment="Center" Grid.Row="4" Classes="light"  ToolTip.Tip="Button with classes &quot;Light&quot;" Clip="" />
+							IsVisible="False" Content="Change cost" Background="AntiqueWhite" CornerRadius="6" HorizontalAlignment="Center" Grid.Row="4" Classes="light" />
+					<Button x:Name="DeleteCost"
+							IsVisible="False" Content="Delete cost" Background="AntiqueWhite" CornerRadius="6" HorizontalAlignment="Center" Grid.Row="5" Classes="light" />
+					<Button x:Name="Query"
+							IsVisible="False" Content="Execute query" Background="AntiqueWhite" CornerRadius="6" HorizontalAlignment="Center" Grid.Row="6" Classes="light" />
 					</Grid>
 				</dialogHost:DialogHost.DialogContent>
 					
@@ -65,10 +79,10 @@
 				<RowDefinition Height="*"/>
 			</Grid.RowDefinitions>
 			<TextBlock Text="Costs"  Margin="5" FontSize="20" FontWeight="Bold" Grid.Row="0" HorizontalAlignment="Center"/>
-			<DataGrid   SelectionChanged="DataGrid_SelectionChanged" BorderBrush="Black" BorderThickness="1" Background="AntiqueWhite" Margin="0,30,0,0" Grid.Row="1" AutoGenerateColumns="False" Name="Costs" Width="660" HorizontalAlignment="Center">				
+			<DataGrid   SelectionChanged="DataGrid_SelectionChanged" BorderBrush="Black" BorderThickness="1" Background="Azure" Margin="0,30,0,0" Grid.Row="1" AutoGenerateColumns="False" Name="Costs" Width="660" HorizontalAlignment="Center">				
 			</DataGrid>
 			<TextBlock Text="Costs Type" FontSize="20" FontWeight="Bold" Margin="5" Grid.Row="2" HorizontalAlignment="Center"/>
-			<DataGrid Grid.Row="3"  BorderBrush="Black" BorderThickness="1" Background="Aqua" AutoGenerateColumns="False" Name="Costs_type"
+			<DataGrid Grid.Row="3"  BorderBrush="Black" BorderThickness="1" Background="Azure" AutoGenerateColumns="False" Name="Costs_type"
 					  Width="720" HorizontalAlignment="Center">
 			</DataGrid>
 			<TextBlock Text="Departments" FontSize="20" FontWeight="Bold" Margin="5" Grid.Row="4" HorizontalAlignment="Center"/>

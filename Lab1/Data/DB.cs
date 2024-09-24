@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Data.SqlClient;
 using System.Data;
+using System.Xml.Linq;
 namespace Lab1.Data
 {
     public class DB
@@ -19,6 +20,16 @@ namespace Lab1.Data
             adapter.Fill(dataTable);
             CloseConnection();
             return dataTable;
+        }
+        public void DeleteCost(int id)
+        {
+            OpenConnection();
+            string query = $"DELETE from Costs WHERE cost_id = {id}";
+            using (SqlCommand command = new SqlCommand(query, sqlConnection))
+            {
+                command.ExecuteNonQuery();
+            }
+            CloseConnection();
         }
         public void ClearTable(params string[] names)
         {
