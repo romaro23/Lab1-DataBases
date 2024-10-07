@@ -26,7 +26,6 @@ public partial class MainView : UserControl
     public MainView()
     {
         InitializeComponent();
-        DataBase.ClearTable("Costs");
         CreateCostButton.Click += CreateCostButton_Click;
         ChangeCostButton.Click += ChangeCostButton_Click;
         DeleteCostButton.Click += DeleteCostButton_Click;

@@ -33,7 +33,7 @@
 				</dialogHost:DialogHost>
 		</Grid>
 		<Grid ZIndex="2">
-			<dialogHost:DialogHost DialogMargin="10" IsOpen="True" CloseOnClickAway="True"  x:Name="Dialog" Background="Aquamarine">
+			<dialogHost:DialogHost DialogMargin="10" IsOpen="False" CloseOnClickAway="True"  x:Name="Dialog" Background="Aquamarine">
 				<dialogHost:DialogHost.DialogContent>
 
 					<Grid Name="DialogContent">
