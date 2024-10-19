@@ -15,6 +15,7 @@
 
 	</Design.DataContext>
 	<Grid>
+		
 		<StackPanel VerticalAlignment="Top" Margin="30" 
 		HorizontalAlignment="Center" Orientation="Horizontal" 			>
 			<Button Background="AntiqueWhite" Name="CreateCostButton" Classes="light" Content="Create cost"  Clip="" />
@@ -54,16 +55,41 @@
 								 Watermark="Department_id" p1:TextFieldAssist.Label="Filled TextBox"/>
 						<TextBox x:Name="AmountBox" CornerRadius="6" Margin="0,0,0,10" Grid.Row="3" UseFloatingWatermark="True" Theme="{StaticResource FilledTextBox}"
 								 Watermark="Amount" p1:TextFieldAssist.Label="Filled TextBox"/>
-						<Button x:Name="CreateCost" Background="AntiqueWhite" CornerRadius="6" IsVisible="False" 							Content="Create cost" HorizontalAlignment="Center" Grid.Row="4" Classes="light"   />
+						<CalendarDatePicker Name="Date" Margin="5" Grid.Row="4" HorizontalAlignment="Center"/>
+						<Button x:Name="CreateCost" Background="AntiqueWhite" CornerRadius="6" IsVisible="False" 							Content="Create cost" HorizontalAlignment="Center" Grid.Row="5" Classes="light"   />
 						<Button x:Name="ChangeCost"
-							IsVisible="False" Content="Change cost" Background="AntiqueWhite" CornerRadius="6" HorizontalAlignment="Center" Grid.Row="4" Classes="light" />
+							IsVisible="False" Content="Change cost" Background="AntiqueWhite" CornerRadius="6" HorizontalAlignment="Center" Grid.Row="5" Classes="light" />
 					<Button x:Name="DeleteCost"
-							IsVisible="False" Content="Delete cost" Background="AntiqueWhite" CornerRadius="6" HorizontalAlignment="Center" Grid.Row="5" Classes="light" />
-					<Button x:Name="Query"
-							IsVisible="False" Content="Execute query" Background="AntiqueWhite" CornerRadius="6" HorizontalAlignment="Center" Grid.Row="6" Classes="light" />
+							IsVisible="False" Content="Delete cost" Background="AntiqueWhite" CornerRadius="6" HorizontalAlignment="Center" Grid.Row="6" Classes="light" />
+					
 					</Grid>
 				</dialogHost:DialogHost.DialogContent>
 					
+			</dialogHost:DialogHost>
+			<dialogHost:DialogHost  Name="QueryWindow" DialogMargin="10" IsOpen="False" CloseOnClickAway="True"   Background="Aquamarine">
+				<dialogHost:DialogHost.DialogContent >
+					<Grid >
+						<Grid.RowDefinitions>
+							<RowDefinition Height="*"/>
+							<RowDefinition Height="*"/>
+							<RowDefinition Height="*"/>
+							<RowDefinition Height="*"/>
+						</Grid.RowDefinitions>
+						<ComboBox Width="250" x:Name="QueryBox" CornerRadius="6" Margin="0,0,0,10" Grid.Row="0"
+SelectionChanged="QueryBox_SelectionChanged" PlaceholderForeground="Gray"				  PlaceholderText="Query" Theme="{StaticResource FilledTextBox}"
+							p1:TextFieldAssist.Label="Filled TextBox"></ComboBox>
+						<Button x:Name="Query"
+							 Content="Execute query" Background="AntiqueWhite" CornerRadius="6" HorizontalAlignment="Center" Grid.Row="1" Classes="light" />
+						<ComboBox IsVisible="False" x:Name="ParameterBox" Margin="10" HorizontalAlignment="Center" CornerRadius="6"  Grid.Row="2"
+				 Width="120" PlaceholderForeground="Gray"	 Theme="{StaticResource FilledTextBox}"
+							p1:TextFieldAssist.Label="Filled TextBox"/>
+						<CalendarDatePicker Name="StartDate" IsVisible="False" Margin="0,5,0,0" HorizontalAlignment="Left" Grid.Row="2" />
+						<CalendarDatePicker Name="EndDate" IsVisible="False" Margin="0,5,0,0" HorizontalAlignment="Right" Grid.Row="2" />
+						<TextBox x:Name="ParameterWrite" CornerRadius="6" Grid.Row="3" Margin="10" 
+								 IsVisible="False" UseFloatingWatermark="True" Theme="{StaticResource FilledTextBox}"
+p1:TextFieldAssist.Label="Filled TextBox"/>
+					</Grid>
+				</dialogHost:DialogHost.DialogContent>
 			</dialogHost:DialogHost>
 		</Grid>
 		

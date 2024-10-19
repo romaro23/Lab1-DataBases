@@ -17,6 +17,14 @@ using System.Linq;
 using System.Data.Common;
 using System.ComponentModel.DataAnnotations;
 using ReactiveUI;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
+using QuestPDF.Companion;
+using QuestPDF.Previewer;
+using System.Reflection.Metadata;
+using System.Runtime.Intrinsics.X86;
+using Avalonia.Data.Converters;
 namespace Lab1.Views;
 
 public partial class MainView : UserControl
@@ -35,15 +43,35 @@ public partial class MainView : UserControl
         DeleteCost.Click += DeleteCost_Click;
         Query.Click += Query_Click;
         Dialog.DialogClosing += Dialog_DialogClosing;
+        QueryWindow.DialogClosing += QueryWindow_DialogClosing;
         UpdateTables();
-    }    
+    }
+    private async void ShowMessage(string message)
+    {
+        var box = MessageBoxManager
+         .GetMessageBoxStandard("Warning", message,
+             ButtonEnum.Ok);
+        var result = await box.ShowAsync();
+    }
+    private void QueryWindow_DialogClosing(object? sender, DialogClosingEventArgs e)
+    {
+        QueryBox.SelectedItem = null;
+        ParameterBox.SelectedItem = null;
+        StartDate.SelectedDate = null;
+        EndDate.SelectedDate = null;
+        ParameterBox.IsVisible = false;
+        ParameterWrite.IsVisible = false;
+        ParameterWrite.Text = "";
+    }
+
     private void Dialog_DialogClosing(object? sender, DialogClosingEventArgs e)
     {
         ChangeCost.IsVisible = false;
         CreateCost.IsVisible = false;
         DeleteCost.IsVisible = false;
-        Query.IsVisible = false;
         Cost_idBox.IsVisible = false;
+        Date.IsVisible = false;
+        Date.SelectedDate = null;
         Type_idBox.IsHitTestVisible = true;
         AmountBox.IsHitTestVisible = true;
         Type_idBox.IsVisible = true;
@@ -70,6 +98,7 @@ public partial class MainView : UserControl
     }
     private void IfChangeBox()
     {
+        Date.IsVisible = true;
         Dialog.IsOpen = true;
         ChangeCost.IsVisible = true;
         Cost_idBox.IsVisible = true;
@@ -82,11 +111,14 @@ public partial class MainView : UserControl
         Department_idBox.IsHitTestVisible = false;
         Cost_idBox.IsVisible = true;
         DeleteCost.IsVisible = true;
+        Date.IsVisible = false;
     }
     private void IfCreateBox()
     {
         Dialog.IsOpen = true;
+        Cost_idBox.IsVisible = false;
         CreateCost.IsVisible = true;
+        Date.IsVisible = true;
     }
     private void IfQueryBox()
     {
@@ -94,7 +126,6 @@ public partial class MainView : UserControl
         Type_idBox.IsVisible = false;
         Department_idBox.IsVisible = false;
         AmountBox.IsVisible = false;
-        Query.IsVisible = true;
         Cost_idBox.IsVisible = true;
         Cost_idBox.PlaceholderText = "Query";
         DialogContent.Width = 250;
@@ -120,42 +151,29 @@ public partial class MainView : UserControl
     {
         SetIdBox();
         IfDeleteBox();
-    
+
 
     }
     private void QueryButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
-        IfQueryBox();
-        SetQueries();
+        QueryWindow.IsOpen = true;
+        SetComplexQueries();
+        //SetLinkedQueries();
     }
-    private async void ShowMessages(bool[] conditions)
+    private void ShowMessages(bool[] conditions)
     {
         if (!conditions[0])
         {
-            var box = MessageBoxManager
-          .GetMessageBoxStandard("Warning", "There is no such id in Costs_type",
-              ButtonEnum.Ok);
-            var result = await box.ShowAsync();
+            ShowMessage("There is no such id in Costs_type");
             return;
         }
         if (!conditions[1])
         {
-            var box = MessageBoxManager
-          .GetMessageBoxStandard("Warning", "There is no such id in Departments",
-              ButtonEnum.Ok);
-            var result = await box.ShowAsync();
-            return;
-        }
-        if (!conditions[2])
-        {
-            var box = MessageBoxManager
-          .GetMessageBoxStandard("Warning", "Limit is exceeded",
-              ButtonEnum.Ok);
-            var result = await box.ShowAsync();
+            ShowMessage("There is no such id in Departments");
             return;
         }
     }
-    private bool[] ValidateData(int type_id, int department_id, int amount)
+    private bool[] ValidateData(int type_id, int department_id)
     {
         bool ValidateId(string column, string table, int id)
         {
@@ -167,23 +185,10 @@ public partial class MainView : UserControl
             }
             return false;
         }
-        bool ValidateAmount(int id, int amount_)
-        {
-            var amount = DataBase.GetData($"SELECT limit_amount from Costs_type WHERE type_id = {id}");
-            if (amount.Rows.Count > 0)
-            {
-                DataRow row = amount.Rows[0];
-                if ((int)row["limit_amount"] > amount_)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-        bool[] conditions = new bool[3];
+
+        bool[] conditions = new bool[2];
         conditions[0] = ValidateId("type_id", "Costs_type", type_id);
         conditions[1] = ValidateId("department_id", "Departments", department_id);
-        conditions[2] = ValidateAmount(type_id, amount);
         return conditions;
     }
     private void UpdateTables()
@@ -199,7 +204,19 @@ public partial class MainView : UserControl
         Departments.ItemsSource = departmentsTable.DefaultView;
         foreach (DataColumn dataColumn in costsTable.Columns)
         {
-            Costs.Columns.Add(new DataGridTextColumn { Header = dataColumn.ColumnName, Binding = new Binding($"Row.ItemArray[{dataColumn.Ordinal}]") });
+            var textColumn = new DataGridTextColumn { Header = dataColumn.ColumnName };
+            if (dataColumn.DataType == typeof(DateTime))
+            {
+                textColumn.Binding = new Binding($"Row.ItemArray[{dataColumn.Ordinal}]")
+                {
+                    Converter = (IValueConverter)App.Current.Resources["DateConverter"]
+                };
+            }
+            else
+            {
+                textColumn.Binding = new Binding($"Row.ItemArray[{dataColumn.Ordinal}]");
+            }
+            Costs.Columns.Add(textColumn);
         }
         foreach (DataColumn dataColumn in costs_typeTable.Columns)
         {
@@ -209,6 +226,61 @@ public partial class MainView : UserControl
         {
             Departments.Columns.Add(new DataGridTextColumn { Header = dataColumn.ColumnName, Binding = new Binding($"Row.ItemArray[{dataColumn.Ordinal}]") });
         }
+        QuestPDF.Settings.License = LicenseType.Community;
+        var document = QuestPDF.Fluent.Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Content().Table(table =>
+                {
+                    table.ColumnsDefinition(columns =>
+                    {
+                        columns.RelativeColumn();
+                    });
+                    for (int i = 0; i < queries.Count * 2; i++)
+                    {
+                        if (i % 2 == 0)
+                        {
+                            table.Cell().Row((uint)i + 1).Column(1).AlignCenter().Text(queries.Keys.ElementAt(i / 2));
+                        }
+                        else
+                        {
+                            table.Cell().Row((uint)i + 1).Column(1).AlignCenter().Padding(5)
+                                                    .Container().Table(table =>
+                                                    {
+                                                        DataTable query = DataBase.GetData(queries.Values.ElementAt(i / 2));
+                                                        table.ColumnsDefinition(columns =>
+                                                        {
+                                                            foreach (var column in query.Columns)
+                                                            {
+                                                                columns.RelativeColumn();
+                                                            }
+                                                            for (int i = 0; i < query.Columns.Count; i++)
+                                                            {
+                                                                table.Cell().Row(1).Column((uint)i + 1)
+                                            .Border(1)
+                                            .Text(query.Columns[i].ColumnName)
+                                            .Bold()
+                                            .AlignCenter();
+                                                            }
+                                                            for (int row = 0; row < query.Rows.Count; row++)
+                                                            {
+                                                                for (int col = 0; col < query.Columns.Count; col++)
+                                                                {
+                                                                    table.Cell().Row((uint)row + 2).Column((uint)col + 1).Border(1).AlignCenter().Text(query.Rows[row][col].ToString());
+                                                                }
+
+                                                            }
+                                                        });
+                                                    });
+                        }
+
+                    }
+                });
+            });
+        });
+        //document.GeneratePdfAndShow();
+        //document.ShowInCompanionAsync();
     }
     private bool CheckFields()
     {
@@ -227,106 +299,136 @@ public partial class MainView : UserControl
         queries.Add("Departments name by DESC", "SELECT * FROM Departments ORDER BY name ASC");
         queries.Add("Type id = 3 and Department id = 3", "SELECT * FROM Costs WHERE type_id = 3 AND department_id = 3");
         queries.Add("Amount < 1000", "SELECT * FROM Costs WHERE amount < 1000");
-        Cost_idBox.ItemsSource = queries.Keys;
-
+        QueryBox.ItemsSource = queries.Keys;
     }
-    private async void CreateCost_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    private void SetLinkedQueries()
+    {
+        queries.Clear();
+        queries.Add("Total amount by type", "SELECT ct.name AS CostType, SUM(c.amount) AS TotalAmount FROM Costs c JOIN Costs_type ct ON c.type_id = ct.type_id GROUP BY ct.name");
+        queries.Add("Number of costs for department", "SELECT d.name AS Department, COUNT(c.cost_id) AS NumberOfCosts FROM Costs c JOIN Departments d ON c.department_id = d.department_id GROUP BY d.name");
+        queries.Add("Average cost for department", "SELECT d.name AS Department, AVG(c.amount) AS AverageCost FROM Costs c JOIN Departments d ON c.department_id = d.department_id GROUP BY d.name");
+        queries.Add("Max amount by type", "SELECT ct.name AS CostType, MAX(c.amount) AS MaxAmount FROM Costs c JOIN Costs_type ct ON c.type_id = ct.type_id GROUP BY ct.name");
+        queries.Add("Min cost for department", "SELECT d.name AS Department, MIN(c.amount) AS MinCost FROM Costs c JOIN Departments d ON c.department_id = d.department_id GROUP BY d.name");
+        queries.Add("Count of departments for type", "SELECT ct.name AS CostType, COUNT(DISTINCT c.department_id) AS CountOfDepartments FROM Costs c JOIN Costs_type ct ON c.type_id = ct.type_id JOIN Departments d ON c.department_id = d.department_id GROUP BY ct.name");
+        queries.Add("Count of types for department", "SELECT d.name AS Department, COUNT(DISTINCT c.type_id) AS CountOfTypes FROM Costs c JOIN Departments d ON c.department_id = d.department_id GROUP BY d.name");
+        QueryBox.ItemsSource = queries.Keys;
+    }
+    private void SetComplexQueries()
+    {
+        queries.Clear();
+        queries.Add("Exceeded avarage amount", "SELECT d.name AS Department, SUM(c.amount) AS TotalAmount FROM Costs c JOIN Departments d ON c.department_id = d.department_id GROUP BY d.name HAVING SUM(c.amount) > (SELECT AVG(avg_amount) FROM (SELECT SUM(amount) AS avg_amount FROM Costs GROUP BY department_id) AS subquery)");
+        queries.Add("Costs for type by parameter", "SELECT c.account_number, c.amount, c.date_of_cost, ct.name AS cost_type, d.name AS department FROM Costs c JOIN Costs_type ct ON c.type_id = ct.type_id JOIN Departments d ON c.department_id = d.department_id WHERE ct.name = @CostType");
+        queries.Add("Departments' exceeded selected limit", "SELECT d.name AS Department, SUM(c.amount) AS TotalAmount FROM Costs c JOIN Departments d ON c.department_id = d.department_id GROUP BY d.name HAVING SUM(c.amount) > @LimitAmount");
+        queries.Add("Departments with no cost", "SELECT d.name AS Department FROM Departments d WHERE NOT EXISTS (SELECT 1 FROM Costs c WHERE c.department_id = d.department_id)");
+        queries.Add("Costs for department by parameter", "SELECT c.account_number, c.amount, c.date_of_cost, ct.name AS cost_type, d.name AS department FROM Costs c JOIN Costs_type ct ON c.type_id = ct.type_id JOIN Departments d ON c.department_id = d.department_id WHERE d.name = @DepartmentName");
+        queries.Add("Departments' count of costs if exceeded avarage count", "SELECT d.name AS Department, COUNT(c.cost_id) AS NumberOfCosts FROM Costs c JOIN Departments d ON c.department_id = d.department_id GROUP BY d.name HAVING COUNT(cost_id) > (SELECT AVG(avg_costAmount) FROM (SELECT COUNT(cost_id) AS avg_costAmount FROM Costs GROUP BY department_id) AS subquery)");
+        queries.Add("Costs for department in date range", "SELECT d.name AS Department, SUM(c.amount) AS TotalAmount FROM Costs c JOIN Departments d ON c.department_id = d.department_id WHERE c.date_of_cost BETWEEN @StartDate AND @EndDate GROUP BY d.name");
+        QueryBox.ItemsSource = queries.Keys;
+    }
+    private void CreateCost_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
         if (CheckFields())
         {
-            var box = MessageBoxManager
-          .GetMessageBoxStandard("Warning", "Fields can't be empty",
-              ButtonEnum.Ok);
-            var result = await box.ShowAsync();
+            ShowMessage("Fields can't be empty");
+            return;
         }
-        else
+        int type_id = int.Parse(Type_idBox.Text);
+        int department_id = int.Parse(Department_idBox.Text);
+        int amount = int.Parse(AmountBox.Text);
+        DateTime date = Date.SelectedDate == null ? DateTime.Now : (DateTime)Date.SelectedDate;
+        bool[] conditions = ValidateData(type_id, department_id);
+        ShowMessages(conditions);
+        if (conditions.All(x => x == true))
         {
-            int type_id = int.Parse(Type_idBox.Text);
-            int department_id = int.Parse(Department_idBox.Text);
-            int amount = int.Parse(AmountBox.Text);           
-            bool[] conditions = ValidateData(type_id, department_id, amount);
-            ShowMessages(conditions);
-            if(conditions.All(x => x == true))
-            {
-                RestoreFields();
-                DataBase.InsertData(type_id, department_id, amount);
-                UpdateTables();
-            }
-            
+            RestoreFields();
+            DataBase.InsertData(type_id, department_id, amount, date);
+            UpdateTables();
         }
 
     }
-    private async void ChangeCost_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    private void ChangeCost_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
         if (CheckFields())
         {
-            var box = MessageBoxManager
-          .GetMessageBoxStandard("Warning", "Fields can't be empty",
-              ButtonEnum.Ok);
-            var result = await box.ShowAsync();
+            ShowMessage("Fields can't be empty");
+            return;
         }
-        else
+        int cost_id = (int)Cost_idBox.SelectedItem;
+        int type_id = int.Parse(Type_idBox.Text);
+        int department_id = int.Parse(Department_idBox.Text);
+        int amount = int.Parse(AmountBox.Text);
+        DateTime date = Date.SelectedDate == null ? DateTime.Now : (DateTime)Date.SelectedDate;
+        bool[] conditions = ValidateData(type_id, department_id);
+        ShowMessages(conditions);
+        if (conditions.All(x => x == true))
         {
-            int cost_id = (int)Cost_idBox.SelectedItem;
-            int type_id = int.Parse(Type_idBox.Text);
-            int department_id = int.Parse(Department_idBox.Text);
-            int amount = int.Parse(AmountBox.Text);
-            bool[] conditions = ValidateData(type_id, department_id, amount);
-            ShowMessages(conditions);
-            if (conditions.All(x => x == true))
-            {
-                RestoreFields();
-                DataBase.ChangeData(cost_id, type_id, department_id, amount);
-                UpdateTables();
-            }
+            RestoreFields();
+            DataBase.ChangeData(cost_id, type_id, department_id, amount, date);
+            UpdateTables();
         }
     }
-    private async void DeleteCost_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    private void DeleteCost_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
-        if(Cost_idBox.SelectedItem != null)
+        if(Cost_idBox.SelectedItem == null)
         {
-            int cost_id = (int)Cost_idBox.SelectedItem;
-            if (cost_id > 0)
-            {
-                RestoreFields();
-                DataBase.DeleteCost(cost_id);
-                SetIdBox();
-                UpdateTables();
-            }
+            ShowMessage("You haven't chosen any cost_id");
+            return;
         }
-        else
+        int cost_id = (int)Cost_idBox.SelectedItem;
+        if (cost_id > 0)
         {
-            var box = MessageBoxManager
-          .GetMessageBoxStandard("Warning", "You haven't chosen any cost_id",
-              ButtonEnum.Ok);
-            var result = await box.ShowAsync();
+            RestoreFields();
+            DataBase.DeleteCost(cost_id);
+            SetIdBox();
+            UpdateTables();
         }
-      
-        
+
+
     }
-    private async void Query_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    private void Query_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
-        if(Cost_idBox.SelectedItem != null)
+        if(QueryBox.SelectedItem == null)
         {
-            QueryDialog.IsOpen = true;
-            DataTable table = DataBase.GetData(queries[Cost_idBox.SelectedItem.ToString()]);
-            QueryGrid.Columns.Clear();
-            QueryGrid.ItemsSource = table.DefaultView;
-            foreach (DataColumn dataColumn in table.Columns)
+            ShowMessage("You haven't chosen any query");
+            return;
+        }
+        string parameter = "";
+        if(ParameterBox.IsVisible == true)
+        {
+            if(ParameterBox.SelectedItem == null)
             {
-                QueryGrid.Columns.Add(new DataGridTextColumn { Header = dataColumn.ColumnName, Binding = new Binding($"Row.ItemArray[{dataColumn.Ordinal}]") });
+                ShowMessage("You haven't chosen any parameter");
+                return;
             }
-            Dialog.IsOpen = false;
-        }
-        else
+            parameter = ParameterBox.SelectedItem.ToString();
+        }      
+        string query = QueryBox.SelectedItem.ToString();
+        int parameterInt = 0;
+        if(ParameterWrite.IsVisible == true)
         {
-            var box = MessageBoxManager
-          .GetMessageBoxStandard("Warning", "You haven't chosen any query",
-              ButtonEnum.Ok);
-            var result = await box.ShowAsync();
+            if(!int.TryParse(ParameterWrite.Text, out parameterInt))
+            {
+                ShowMessage("Wrong value. Write int");
+                return;
+            }
         }
-        
-        
+        DateTime start = default, end = default;
+        if(StartDate.IsVisible == true)
+        {
+            start = StartDate.SelectedDate == null ? DateTime.Now : (DateTime)StartDate.SelectedDate;
+            end = EndDate.SelectedDate == null ? DateTime.Now : (DateTime)EndDate.SelectedDate;
+        }       
+        QueryDialog.IsOpen = true;
+        DataTable table = DataBase.GetData(queries[query], parameter, parameterInt, start, end);
+        QueryGrid.Columns.Clear();
+        QueryGrid.ItemsSource = table.DefaultView;
+        foreach (DataColumn dataColumn in table.Columns)
+        {
+            QueryGrid.Columns.Add(new DataGridTextColumn { Header = dataColumn.ColumnName, Binding = new Binding($"Row.ItemArray[{dataColumn.Ordinal}]") });
+        }
+        QueryWindow.IsOpen = false;
+
+
     }
     private void DataGrid_SelectionChanged(object? sender, Avalonia.Controls.SelectionChangedEventArgs e)
     {
@@ -341,7 +443,58 @@ public partial class MainView : UserControl
             AmountBox.Text = selectedRow["amount"].ToString();
         }
     }
+    private void QueryBox_SelectionChanged(object? sender, Avalonia.Controls.SelectionChangedEventArgs e)
+    {
+        if(QueryBox.SelectedItem == null)
+        {
+            return;
+        }
+        string query = QueryBox.SelectedItem.ToString();
 
+        if (queries[query].Contains("@"))
+        {
+            ParameterBox.IsVisible = true;
+            List<string> names = new List<string>();
+            DataTable table = new DataTable();
+            if (queries[query].Contains("CostType"))
+            {
+                table = DataBase.GetData("SELECT name FROM Costs_type");
+                ParameterBox.PlaceholderText = "CostType";
+            }
+            if (queries[query].Contains("DepartmentName"))
+            {
+                table = DataBase.GetData("SELECT name FROM Departments");
+                ParameterBox.PlaceholderText = "Department";
+            }
+            if (queries[query].Contains("LimitAmount"))
+            {
+                ParameterBox.IsVisible = false;
+                ParameterWrite.IsVisible = true;
+                ParameterWrite.Watermark = "Amount";
+            }
+            if (queries[query].Contains("Date"))
+            {
+                ParameterBox.IsVisible = false;
+                StartDate.IsVisible = true;
+                EndDate.IsVisible = true;
+            }
+            else { ParameterWrite.IsVisible = false; }
+            foreach (DataRow row in table.Rows)
+            {
+                names.Add(row["name"].ToString());
+            }
+            ParameterBox.Width = 200;
+            ParameterBox.ItemsSource = names;
+        }
+        else
+        {
+            ParameterWrite.IsVisible = false;
+            ParameterBox.IsVisible = false;
+            StartDate.IsVisible = false;
+            EndDate.IsVisible = false;
+        }
+
+    }
     private void ComboBox_SelectionChanged_1(object? sender, Avalonia.Controls.SelectionChangedEventArgs e)
     {
         if (Cost_idBox.SelectedItem != null && Cost_idBox.PlaceholderText == "Cost_id")
@@ -350,9 +503,9 @@ public partial class MainView : UserControl
             Type_idBox.Text = row.Rows[0]["type_id"].ToString();
             Department_idBox.Text = row.Rows[0]["department_id"].ToString();
             AmountBox.Text = row.Rows[0]["amount"].ToString();
-            
+            Date.SelectedDate = (DateTime)row.Rows[0]["date_of_cost"];
         }
-        
+
 
     }
 }
