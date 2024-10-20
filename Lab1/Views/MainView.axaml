@@ -21,7 +21,8 @@
 			<Button Background="AntiqueWhite" Name="CreateCostButton" Classes="light" Content="Create cost"  Clip="" />
 			<Button Background="AntiqueWhite" Name="ChangeCostButton" Classes="light" Content="Change cost" Clip="" />
 			<Button Background="AntiqueWhite"  Name="DeleteCostButton" Classes="light" Content="Delete cost" Clip="" />
-			<Button Background="AntiqueWhite"  Name="QueryButton" Classes="light" Content="Query" Clip="" />
+			<Button Background="AntiqueWhite"  Name="LinkedQueryButton" Classes="light" Content="LinkedQuery" Clip="" />
+			<Button Background="AntiqueWhite"  Name="ComplexQueryButton" Classes="light" Content="ComplexQuery" Clip="" />
 		</StackPanel>
 
 <Grid ZIndex="2">

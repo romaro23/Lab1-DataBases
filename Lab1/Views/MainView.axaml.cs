@@ -37,7 +37,8 @@ public partial class MainView : UserControl
         CreateCostButton.Click += CreateCostButton_Click;
         ChangeCostButton.Click += ChangeCostButton_Click;
         DeleteCostButton.Click += DeleteCostButton_Click;
-        QueryButton.Click += QueryButton_Click;
+        LinkedQueryButton.Click += QueryButton_Click;
+        ComplexQueryButton.Click += QueryButton_Click;
         CreateCost.Click += CreateCost_Click;
         ChangeCost.Click += ChangeCost_Click;
         DeleteCost.Click += DeleteCost_Click;
@@ -157,8 +158,18 @@ public partial class MainView : UserControl
     private void QueryButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
         QueryWindow.IsOpen = true;
-        SetComplexQueries();
-        //SetLinkedQueries();
+        var button = sender as Button;
+        QueryBox.ItemsSource = null;
+        if (button.Name.Contains("Linked"))
+        {
+            SetLinkedQueries();
+        }
+        else if (button.Name.Contains("Complex"))
+        {
+            SetComplexQueries();
+        }
+
+
     }
     private void ShowMessages(bool[] conditions)
     {
@@ -227,60 +238,7 @@ public partial class MainView : UserControl
             Departments.Columns.Add(new DataGridTextColumn { Header = dataColumn.ColumnName, Binding = new Binding($"Row.ItemArray[{dataColumn.Ordinal}]") });
         }
         QuestPDF.Settings.License = LicenseType.Community;
-        var document = QuestPDF.Fluent.Document.Create(container =>
-        {
-            container.Page(page =>
-            {
-                page.Content().Table(table =>
-                {
-                    table.ColumnsDefinition(columns =>
-                    {
-                        columns.RelativeColumn();
-                    });
-                    for (int i = 0; i < queries.Count * 2; i++)
-                    {
-                        if (i % 2 == 0)
-                        {
-                            table.Cell().Row((uint)i + 1).Column(1).AlignCenter().Text(queries.Keys.ElementAt(i / 2));
-                        }
-                        else
-                        {
-                            table.Cell().Row((uint)i + 1).Column(1).AlignCenter().Padding(5)
-                                                    .Container().Table(table =>
-                                                    {
-                                                        DataTable query = DataBase.GetData(queries.Values.ElementAt(i / 2));
-                                                        table.ColumnsDefinition(columns =>
-                                                        {
-                                                            foreach (var column in query.Columns)
-                                                            {
-                                                                columns.RelativeColumn();
-                                                            }
-                                                            for (int i = 0; i < query.Columns.Count; i++)
-                                                            {
-                                                                table.Cell().Row(1).Column((uint)i + 1)
-                                            .Border(1)
-                                            .Text(query.Columns[i].ColumnName)
-                                            .Bold()
-                                            .AlignCenter();
-                                                            }
-                                                            for (int row = 0; row < query.Rows.Count; row++)
-                                                            {
-                                                                for (int col = 0; col < query.Columns.Count; col++)
-                                                                {
-                                                                    table.Cell().Row((uint)row + 2).Column((uint)col + 1).Border(1).AlignCenter().Text(query.Rows[row][col].ToString());
-                                                                }
 
-                                                            }
-                                                        });
-                                                    });
-                        }
-
-                    }
-                });
-            });
-        });
-        //document.GeneratePdfAndShow();
-        //document.ShowInCompanionAsync();
     }
     private bool CheckFields()
     {
@@ -369,7 +327,7 @@ public partial class MainView : UserControl
     }
     private void DeleteCost_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
-        if(Cost_idBox.SelectedItem == null)
+        if (Cost_idBox.SelectedItem == null)
         {
             ShowMessage("You haven't chosen any cost_id");
             return;
@@ -385,41 +343,88 @@ public partial class MainView : UserControl
 
 
     }
+    private void GeneratePdf(string description, DataTable table_)
+    {
+        var document = QuestPDF.Fluent.Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Content().Table(table =>
+                {
+                    table.ColumnsDefinition(columns =>
+                    {
+                        columns.RelativeColumn();
+                    });
+                    table.Cell().Row(1).Column(1).AlignCenter().Text(description);
+                    table.Cell().Row(2).Column(1).AlignCenter().Padding(5)
+                                            .Container().Table(table =>
+                                            {
+                                                table.ColumnsDefinition(columns =>
+                                                {
+                                                    foreach (var column in table_.Columns)
+                                                    {
+                                                        columns.RelativeColumn();
+                                                    }
+                                                    for (int i = 0; i < table_.Columns.Count; i++)
+                                                    {
+                                                        table.Cell().Row(1).Column((uint)i + 1)
+                                    .Border(1)
+                                    .Text(table_.Columns[i].ColumnName)
+                                    .Bold()
+                                    .AlignCenter();
+                                                    }
+                                                    for (int row = 0; row < table_.Rows.Count; row++)
+                                                    {
+                                                        for (int col = 0; col < table_.Columns.Count; col++)
+                                                        {
+                                                            table.Cell().Row((uint)row + 2).Column((uint)col + 1).Border(1).AlignCenter().Text(table_.Rows[row][col].ToString());
+                                                        }
+
+                                                    }
+                                                });
+                                            });
+                });
+            });
+        });
+        string file = string.Format(@"D:\source\repos\CSharp\University\DataBases\Lab1\Lab1\Assets\{0}.pdf", description);
+        document.GeneratePdf(file);
+    }
     private void Query_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
-        if(QueryBox.SelectedItem == null)
+        if (QueryBox.SelectedItem == null)
         {
             ShowMessage("You haven't chosen any query");
             return;
         }
         string parameter = "";
-        if(ParameterBox.IsVisible == true)
+        if (ParameterBox.IsVisible == true)
         {
-            if(ParameterBox.SelectedItem == null)
+            if (ParameterBox.SelectedItem == null)
             {
                 ShowMessage("You haven't chosen any parameter");
                 return;
             }
             parameter = ParameterBox.SelectedItem.ToString();
-        }      
+        }
         string query = QueryBox.SelectedItem.ToString();
         int parameterInt = 0;
-        if(ParameterWrite.IsVisible == true)
+        if (ParameterWrite.IsVisible == true)
         {
-            if(!int.TryParse(ParameterWrite.Text, out parameterInt))
+            if (!int.TryParse(ParameterWrite.Text, out parameterInt))
             {
                 ShowMessage("Wrong value. Write int");
                 return;
             }
         }
         DateTime start = default, end = default;
-        if(StartDate.IsVisible == true)
+        if (StartDate.IsVisible == true)
         {
             start = StartDate.SelectedDate == null ? DateTime.Now : (DateTime)StartDate.SelectedDate;
             end = EndDate.SelectedDate == null ? DateTime.Now : (DateTime)EndDate.SelectedDate;
-        }       
+        }
         QueryDialog.IsOpen = true;
         DataTable table = DataBase.GetData(queries[query], parameter, parameterInt, start, end);
+        GeneratePdf(query, table);
         QueryGrid.Columns.Clear();
         QueryGrid.ItemsSource = table.DefaultView;
         foreach (DataColumn dataColumn in table.Columns)
@@ -445,10 +450,12 @@ public partial class MainView : UserControl
     }
     private void QueryBox_SelectionChanged(object? sender, Avalonia.Controls.SelectionChangedEventArgs e)
     {
-        if(QueryBox.SelectedItem == null)
+        if (QueryBox.SelectedItem == null)
         {
             return;
         }
+        StartDate.IsVisible = false;
+        EndDate.IsVisible = false;
         string query = QueryBox.SelectedItem.ToString();
 
         if (queries[query].Contains("@"))
@@ -472,13 +479,16 @@ public partial class MainView : UserControl
                 ParameterWrite.IsVisible = true;
                 ParameterWrite.Watermark = "Amount";
             }
+            else
+            {
+                ParameterWrite.IsVisible = false;
+            }
             if (queries[query].Contains("Date"))
             {
                 ParameterBox.IsVisible = false;
                 StartDate.IsVisible = true;
                 EndDate.IsVisible = true;
             }
-            else { ParameterWrite.IsVisible = false; }
             foreach (DataRow row in table.Rows)
             {
                 names.Add(row["name"].ToString());
@@ -490,8 +500,7 @@ public partial class MainView : UserControl
         {
             ParameterWrite.IsVisible = false;
             ParameterBox.IsVisible = false;
-            StartDate.IsVisible = false;
-            EndDate.IsVisible = false;
+
         }
 
     }
