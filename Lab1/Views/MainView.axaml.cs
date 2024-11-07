@@ -264,7 +264,7 @@ public partial class MainView : UserControl
         queries.Clear();
         queries.Add("Total amount by type", "SELECT ct.name AS CostType, SUM(c.amount) AS TotalAmount FROM Costs c JOIN Costs_type ct ON c.type_id = ct.type_id GROUP BY ct.name");
         queries.Add("Number of costs for department", "SELECT d.name AS Department, COUNT(c.cost_id) AS NumberOfCosts FROM Costs c JOIN Departments d ON c.department_id = d.department_id GROUP BY d.name");
-        queries.Add("Average cost for department", "SELECT d.name AS Department, AVG(c.amount) AS AverageCost FROM Costs c JOIN Departments d ON c.department_id = d.department_id GROUP BY d.name");
+        queries.Add("Average cost for department", "SELECT d.name AS Department, AVG(c.amount) AS AverageCost, COUNT (c.amount) AS NumberOfCosts, SUM(c.amount) AS TotalAmount FROM Costs c JOIN Departments d ON c.department_id = d.department_id GROUP BY d.name");
         queries.Add("Max amount by type", "SELECT ct.name AS CostType, MAX(c.amount) AS MaxAmount FROM Costs c JOIN Costs_type ct ON c.type_id = ct.type_id GROUP BY ct.name");
         queries.Add("Min cost for department", "SELECT d.name AS Department, MIN(c.amount) AS MinCost FROM Costs c JOIN Departments d ON c.department_id = d.department_id GROUP BY d.name");
         queries.Add("Count of departments for type", "SELECT ct.name AS CostType, COUNT(DISTINCT c.department_id) AS CountOfDepartments FROM Costs c JOIN Costs_type ct ON c.type_id = ct.type_id JOIN Departments d ON c.department_id = d.department_id GROUP BY ct.name");
@@ -274,7 +274,7 @@ public partial class MainView : UserControl
     private void SetComplexQueries()
     {
         queries.Clear();
-        queries.Add("Exceeded avarage amount", "SELECT d.name AS Department, SUM(c.amount) AS TotalAmount FROM Costs c JOIN Departments d ON c.department_id = d.department_id GROUP BY d.name HAVING SUM(c.amount) > (SELECT AVG(avg_amount) FROM (SELECT SUM(amount) AS avg_amount FROM Costs GROUP BY department_id) AS subquery)");
+        queries.Add("Exceeded avarage amount", "SELECT d.name AS Department, AVG(c.amount) AS AverageAmount FROM Costs c JOIN Departments d ON c.department_id = d.department_id GROUP BY d.name HAVING AVG(c.amount) > (SELECT AVG(amount) FROM Costs)");
         queries.Add("Costs for type by parameter", "SELECT c.account_number, c.amount, c.date_of_cost, ct.name AS cost_type, d.name AS department FROM Costs c JOIN Costs_type ct ON c.type_id = ct.type_id JOIN Departments d ON c.department_id = d.department_id WHERE ct.name = @CostType");
         queries.Add("Departments' exceeded selected limit", "SELECT d.name AS Department, SUM(c.amount) AS TotalAmount FROM Costs c JOIN Departments d ON c.department_id = d.department_id GROUP BY d.name HAVING SUM(c.amount) > @LimitAmount");
         queries.Add("Departments with no cost", "SELECT d.name AS Department FROM Departments d WHERE NOT EXISTS (SELECT 1 FROM Costs c WHERE c.department_id = d.department_id)");
@@ -423,6 +423,19 @@ public partial class MainView : UserControl
             end = EndDate.SelectedDate == null ? DateTime.Now : (DateTime)EndDate.SelectedDate;
         }
         QueryDialog.IsOpen = true;
+        Average.Text = string.Empty;
+        Average.IsVisible = false;
+        if (queries[query].Contains("SELECT AVG(amount) FROM Costs")) {
+            var avg = DataBase.GetData("SELECT AVG(amount) FROM Costs");
+            Average.IsVisible = true;
+            Average.Text = "Average amount: " + avg.Rows[0][0].ToString();
+        }
+        if (queries[query].Contains("avg_costAmount"))
+        {
+            var avg = DataBase.GetData("SELECT AVG(avg_count) FROM (SELECT COUNT(cost_id) AS avg_count FROM Costs GROUP BY department_id) AS Subquery");
+            Average.IsVisible = true;
+            Average.Text = "Average number of costs: " + avg.Rows[0][0].ToString();
+        }
         DataTable table = DataBase.GetData(queries[query], parameter, parameterInt, start, end);
         GeneratePdf(query, table);
         QueryGrid.Columns.Clear();

@@ -33,6 +33,7 @@ namespace Lab1.Data
                 command.Parameters.AddWithValue("@StartDate", start);
                 command.Parameters.AddWithValue("@EndDate", end);
             }
+
             SqlDataAdapter adapter = new SqlDataAdapter(command);
             adapter.Fill(dataTable);
             CloseConnection();

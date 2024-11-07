@@ -26,11 +26,15 @@
 		</StackPanel>
 
 <Grid ZIndex="2">
-			<dialogHost:DialogHost DialogMargin="10"  CloseOnClickAway="True"  x:Name="QueryDialog" Background="Aquamarine" IsOpen="False">
+			<dialogHost:DialogHost DialogMargin="10"  CloseOnClickAway="True"  x:Name="QueryDialog" Background="Aquamarine" IsOpen="True">
 				<dialogHost:DialogHost.DialogContent>
-					<DataGrid BorderBrush="Black" BorderThickness="1" Background="Azure"
+					<StackPanel>
+						<TextBlock Name="Average" HorizontalAlignment="Center"></TextBlock>
+						<DataGrid BorderBrush="Black" BorderThickness="1" Background="Azure"
 							  AutoGenerateColumns="False" Name="QueryGrid"
 					  Width="720" HorizontalAlignment="Center"></DataGrid>
+					</StackPanel>
+					
 				</dialogHost:DialogHost.DialogContent>
 				</dialogHost:DialogHost>
 		</Grid>
